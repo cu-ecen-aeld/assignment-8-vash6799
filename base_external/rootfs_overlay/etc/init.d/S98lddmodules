@@ -35,10 +35,10 @@ case "$1" in
     make_scull_nodes
 
     # Load faulty, then create /dev/faulty
-    insmod /lib/modules/$(uname -r)/extra/faulty.ko 2>/dev/null || true
+    modprobe faulty 2>/dev/null || true
     make_node faulty 0
-
-    # Load hello
+    
+# Load hello
     modprobe hello 2>/dev/null || true
     ;;
 
