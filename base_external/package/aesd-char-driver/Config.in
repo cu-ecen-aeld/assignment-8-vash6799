@@ -1,0 +1,6 @@
+config BR2_PACKAGE_AESD_CHAR_DRIVER
+	bool "aesd-char-driver"
+	depends on BR2_LINUX_KERNEL
+	help
+	  Includes the AESD character device driver kernel module
+	  and the associated load/unload utility scripts.

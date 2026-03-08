@@ -1,13 +1,10 @@
-
-
 ##############################################################
 #
 # AESD-ASSIGNMENTS
 #
 ##############################################################
 
-#TODO: Fill up the contents below in order to reference your assignment 3 git contents
-AESD_ASSIGNMENTS_VERSION = 'c56a5a7de7df3336d74c4ea1201198089e2a1121'
+AESD_ASSIGNMENTS_VERSION = 'c27a56016c20eb776162c510e58a810c18581e76'
 # Note: Be sure to reference the *ssh* repository URL here (not https) to work properly
 # with ssh keys and the automated build/test system.
 # Your site should start with git@github.com:
@@ -15,13 +12,15 @@ AESD_ASSIGNMENTS_SITE = 'git@github.com:cu-ecen-aeld/assignments-3-and-later-vas
 AESD_ASSIGNMENTS_SITE_METHOD = git
 AESD_ASSIGNMENTS_GIT_SUBMODULES = YES
 
+# Tell Buildroot's kernel module infrastructure where your driver code is
+AESD_ASSIGNMENTS_MODULE_SUBDIRS = aesd-char-driver
+
 define AESD_ASSIGNMENTS_BUILD_CMDS
         $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/finder-app all
         $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/server clean
         $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/server all
 endef
 
-# TODO add your writer, finder and finder-test utilities/scripts to the installation steps below
 define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
         # Create target directories
         $(INSTALL) -d 0755 $(TARGET_DIR)/usr/bin
@@ -34,16 +33,21 @@ define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
         $(INSTALL) -m 0755 $(@D)/finder-app/finder.sh $(TARGET_DIR)/usr/bin/
         $(INSTALL) -m 0755 $(@D)/finder-app/finder-test.sh $(TARGET_DIR)/usr/bin/
 
-        # Install writer binary (built in BUILD_CMDS)
+        # Install writer binary
         $(INSTALL) -m 0755 $(@D)/finder-app/writer $(TARGET_DIR)/usr/bin/
 
-        # Optional: if you have tester.sh in your A3 repo
-        # $(INSTALL) -m 0755 $(@D)/finder-app/tester.sh $(TARGET_DIR)/usr/bin/
-
         # Install the executable to /usr/bin
-	$(INSTALL) -m 0755 $(@D)/server/aesdsocket $(TARGET_DIR)/usr/bin/
-	# Install the init script to /etc/init.d/ with the S99 prefix
-	$(INSTALL) -m 0755 $(@D)/server/aesdsocket-start-stop $(TARGET_DIR)/etc/init.d/S99aesdsocket
+        $(INSTALL) -m 0755 $(@D)/server/aesdsocket $(TARGET_DIR)/usr/bin/
+        
+        # Install the socket init script to /etc/init.d/ with the S99 prefix
+	$(INSTALL) -m 0755 $(@D)/server/S99aesdsocket $(TARGET_DIR)/etc/init.d/S99aesdsocket
+
+        # Install the driver load and unload scripts to /usr/bin
+        $(INSTALL) -m 0755 $(@D)/aesd-char-driver/aesdchar_load $(TARGET_DIR)/usr/bin/
+        $(INSTALL) -m 0755 $(@D)/aesd-char-driver/aesdchar_unload $(TARGET_DIR)/usr/bin/
 endef
 
+# The kernel-module macro automatically handles compiling aesdchar.ko 
+# against the QEMU kernel and installing it into /lib/modules/
+$(eval $(kernel-module))
 $(eval $(generic-package))
